@@ -67,8 +67,8 @@ const arrowMaterial = (() => {
         vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
         gl_Position = projectionMatrix * mvPosition;
         
-        ${THREE.ShaderChunk.logdepthbuf_vertex}
         vUv = uv;
+        ${THREE.ShaderChunk.logdepthbuf_vertex}
       }
     `,
     fragmentShader: `\
@@ -78,7 +78,6 @@ const arrowMaterial = (() => {
       uniform sampler2D tex;
       uniform float uTime;
       varying vec2 vUv;
-
       ${THREE.ShaderChunk.logdepthbuf_pars_fragment}
       void main() {
         float t = floor(uTime * 16. * 16.);
@@ -87,17 +86,17 @@ const arrowMaterial = (() => {
         float y = 0.;
         vec2 uv = (vUv / 16.0) + vec2(x, y)/16.;
         gl_FragColor = texture2D(tex, uv);
-	${THREE.ShaderChunk.logdepthbuf_fragment}
         if (gl_FragColor.a < 0.9) {
           discard;
         }
+        ${THREE.ShaderChunk.logdepthbuf_fragment}
       }
     `,
     transparent: true,
     side: THREE.DoubleSide,
-    polygonOffset: true,
-    polygonOffsetFactor: -1,
-    polygonOffsetUnits: 1,
+    // polygonOffset: true,
+    // polygonOffsetFactor: -1,
+    // polygonOffsetUnits: 1,
   });
   return material;
 })();
@@ -145,8 +144,9 @@ const tailMaterial = (() => {
       void main() {
         vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
         gl_Position = projectionMatrix * mvPosition;
-        ${THREE.ShaderChunk.logdepthbuf_vertex}
+        
         vUv = uv;
+        ${THREE.ShaderChunk.logdepthbuf_vertex}
       }
     `,
     fragmentShader: `\
@@ -160,8 +160,6 @@ const tailMaterial = (() => {
       void main() {
         // gl_FragColor = vec4(1., 0., 0., 1.);
         gl_FragColor = texture2D(tex, vec2(vUv.x, vUv.y + uTime));
-        // gl_FragColor.rgb *= 1. + vUv.y;
-        // gl_FragColor.a = pow(vUv.y, 0.5);
         ${THREE.ShaderChunk.logdepthbuf_fragment}
       }
     `,
@@ -183,6 +181,7 @@ export default () => {
   // mesh.visible = false;
   // console.log('got bounding box', boundingBox);
   app.add(mesh);
+  mesh.updateMatrixWorld();
 
   const tailMesh = (() => {
     const width = 0.47;
@@ -300,6 +299,7 @@ export default () => {
     return tailMesh;
   })();
   app.add(tailMesh);
+  tailMesh.updateMatrixWorld();
 
   // const angle = new THREE.Euler(Math.random()*Math.PI*2, Math.random()*Math.PI*2, Math.random()*Math.PI*2, 'YXZ');
   // const direction = new THREE.Euler(Math.random()*Math.PI*2, Math.random()*Math.PI*2, Math.random()*Math.PI*2, 'YXZ');
@@ -315,6 +315,7 @@ export default () => {
       r * Math.sin(azimuth) * Math.sin(inclination),
       r * Math.cos(inclination)
     );
+
     mesh.quaternion.setFromRotationMatrix(
       localMatrix.lookAt(
         lastPosition,
@@ -329,6 +330,11 @@ export default () => {
     inclination += di;
     inclination %= Math.PI*2;
     mesh.updateMatrixWorld();
+    /* mesh.quaternion.setFromEuler(angle);
+    mesh.position.set(0, 0, -1).applyQuaternion(mesh.quaternion);
+    angle.x += direction.x * 0.01;
+    angle.y += direction.y * 0.01;
+    angle.z += direction.z * 0.01; */
     
 	  mesh.material.uniforms.uTime.value = (timestamp % 30000) / 30000;
     mesh.material.uniforms.uTime.needsUpdate = true;

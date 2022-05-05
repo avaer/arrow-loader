@@ -1,3 +1,5 @@
 {
+  "name": "arrow-loader",
+  "description": "arrow-loader",
   "start_url": "index.js"
 }
